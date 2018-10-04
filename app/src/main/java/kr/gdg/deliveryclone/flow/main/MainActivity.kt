@@ -1,5 +1,6 @@
 package kr.gdg.deliveryclone.flow.main
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.support.design.widget.NavigationView
 import android.support.v4.view.GravityCompat
@@ -20,9 +21,23 @@ import android.graphics.Rect
 import android.support.annotation.NonNull
 import android.view.View
 import android.widget.TextView
+import android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
+import android.provider.Settings
+import android.location.Criteria
+import android.support.v4.app.ActivityCompat
+import android.support.v4.content.ContextCompat
+import kr.gdg.deliveryclone.utils.CheckPermission
 
 
-class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(), MainContract.View, NavigationView.OnNavigationItemSelectedListener {
+class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(), MainContract.View, NavigationView.OnNavigationItemSelectedListener, LocationListener {
+    private lateinit var locationManager : LocationManager
+    private lateinit var provider: String
+
 
     override var mPresenter: MainContract.Presenter = MainPresenter()
 
@@ -42,6 +57,9 @@ class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
+
+        checkGPS()
+        initMyLocation()
 
         val toggle = ActionBarDrawerToggle(
                 this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
@@ -118,6 +136,45 @@ class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(
 //        resultTxt.text = count.toString()
     }
 
+    private fun initMyLocation() {
+
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            updateMyLocation()
+        } else {
+            ActivityCompat.requestPermissions(this,arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), 1);
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        if (permissions.size == 1 &&
+                permissions[0] == android.Manifest.permission.ACCESS_FINE_LOCATION &&
+                grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return
+            }
+        }else {
+            updateMyLocation()
+        }
+    }
+
+
+    override fun onLocationChanged(p0: Location?) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun onStatusChanged(p0: String?, p1: Int, p2: Bundle?) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun onProviderEnabled(p0: String?) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun onProviderDisabled(p0: String?) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     internal inner class ItemOffsetDecoration(private val mItemOffset: Int) : RecyclerView.ItemDecoration() {
 
         constructor(@NonNull context: Context, @DimenRes itemOffsetId: Int) : this(context.getResources().getDimensionPixelSize(itemOffsetId)) {}
@@ -128,4 +185,29 @@ class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(
             outRect.set(mItemOffset, mItemOffset, mItemOffset, mItemOffset)
         }
     }
+
+    fun checkGPS() {
+        val service = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        val enabled = service
+                .isProviderEnabled(LocationManager.GPS_PROVIDER)
+
+// check if enabled and if not send user to the GSP settings
+// Better solution would be to display a dialog and suggesting to
+// go to the settings
+        if (!enabled) {
+            val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+            startActivity(intent)
+        }
+    }
+
+    fun updateMyLocation() {
+        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        val criteria = Criteria()
+        provider = locationManager.getBestProvider(criteria, false);
+        val location = locationManager.getLastKnownLocation(provider);
+        if(location != null)
+            print("${location.latitude},${location.longitude}")
+    }
+
+
 }
