@@ -31,6 +31,7 @@ import android.provider.Settings
 import android.location.Criteria
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
+import android.util.Log
 import kr.gdg.deliveryclone.utils.CheckPermission
 
 
@@ -203,10 +204,27 @@ class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(
     fun updateMyLocation() {
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
         val criteria = Criteria()
+        // 정확도
+        criteria.setAccuracy(Criteria.NO_REQUIREMENT);
+        // 전원 소비량
+        criteria.setPowerRequirement(Criteria.NO_REQUIREMENT);
+        // 고도, 높이 값을 얻어 올지를 결정
+        criteria.setAltitudeRequired(false);
+        // provider 기본 정보(방위, 방향)
+        criteria.setBearingRequired(false);
+        // 속도
+        criteria.setSpeedRequired(false);
+        // 위치 정보를 얻어 오는데 들어가는 금전적 비용
+        criteria.setCostAllowed(true);
+
         provider = locationManager.getBestProvider(criteria, false);
+//        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+//        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+//        locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 0, 0, this);
         val location = locationManager.getLastKnownLocation(provider);
-        if(location != null)
-            print("${location.latitude},${location.longitude}")
+        if(location != null) {
+            Log.d("KTH","${location.latitude},${location.longitude}")
+        }
     }
 
 
