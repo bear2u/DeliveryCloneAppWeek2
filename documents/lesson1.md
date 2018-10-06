@@ -3,4 +3,4 @@
 ## 목표
 
 ## MVP flow
-![mvp flow](lesson1.png)
+![mvp flow](mvp.png)
