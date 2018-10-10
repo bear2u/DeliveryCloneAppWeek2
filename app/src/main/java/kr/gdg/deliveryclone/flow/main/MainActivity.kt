@@ -224,6 +224,7 @@ class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(
         val location = locationManager.getLastKnownLocation(provider);
         if(location != null) {
             Log.d("KTH","${location.latitude},${location.longitude}")
+            mPresenter.getAddr(0.0,0.0)
         }
     }
 

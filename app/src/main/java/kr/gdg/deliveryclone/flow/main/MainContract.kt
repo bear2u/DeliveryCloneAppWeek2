@@ -9,6 +9,7 @@ object MainContract {
     }
 
     interface Presenter : BaseMvpPresenter<View> {
+        fun getAddr(lat: Double, lng: Double)
         fun addCount(count : Int)
     }
 }

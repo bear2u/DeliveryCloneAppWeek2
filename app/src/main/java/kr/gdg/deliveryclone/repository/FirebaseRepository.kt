@@ -2,6 +2,9 @@ package kr.gdg.deliveryclone.repository
 
 import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
+import io.reactivex.Observable
+import kr.gdg.deliveryclone.model.Address
+import kr.gdg.deliveryclone.model.ResponseAddress
 
 class FirebaseRepository : Repository{
     val firestoreApp by lazy {
@@ -24,5 +27,9 @@ class FirebaseRepository : Repository{
 
     override fun getCount() : Int {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun getConvertedAddr(lat: Double, lng: Double) : Observable<ResponseAddress> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File
     }
 }

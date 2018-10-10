@@ -6,15 +6,19 @@ import kr.gdg.deliveryclone.repository.RepositoryImpl
 
 class MainPresenter : BaseMvpPresenterImpl<MainContract.View>(), MainContract.Presenter {
 
-    private val repository : Repository by lazy {
+    private val repository  by lazy {
         RepositoryImpl()
     }
 
     override fun addCount(count: Int) {
-        repository.addCount(count)
+//        repository.addCount(count)
+//
+//        val result = repository.getCount()
 
-        val result = repository.getCount()
+        mView?.updateView(count + 1)
+    }
 
-        mView?.updateView(result)
+    override fun getAddr(lat: Double, lng: Double) {
+        repository.convertAddr(129.075090, 35.179632)
     }
 }

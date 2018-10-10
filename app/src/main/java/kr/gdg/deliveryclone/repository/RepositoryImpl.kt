@@ -1,21 +1,37 @@
 package kr.gdg.deliveryclone.repository
 
-class RepositoryImpl : Repository{
+import android.util.Log
+import io.reactivex.rxkotlin.subscribeBy
+
+class RepositoryImpl {
 
     val firebaseRepo : Repository by lazy {
         FirebaseRepository()
     }
 
+//    val networkRepo : Repository by lazy {
+//        NetworkRepsitory()
+//    }
+
     var result = 0
 
-    override fun addCount(count: Int) {
+    fun addCount(count: Int) {
         result = count + 1
 
         firebaseRepo.addCount(result);
 
     }
 
-    override fun getCount() : Int {
+    fun getCount() : Int {
         return result
+    }
+
+    fun convertAddr(lat: Double, lng: Double) {
+        NetworkRepsitory.getConvertedAddr(lat, lng)
+                .subscribeBy(
+                        onNext = {
+                            Log.d("GDG", it.toString())
+                        }
+                )
     }
 }
