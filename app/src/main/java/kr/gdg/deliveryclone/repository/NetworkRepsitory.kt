@@ -2,7 +2,6 @@ package kr.gdg.deliveryclone.repository
 
 import io.reactivex.Observable
 import kr.gdg.deliveryclone.model.Address
-import kr.gdg.deliveryclone.model.ResponseAddress
 import kr.gdg.deliveryclone.repository.api.ApiManager
 
 object NetworkRepsitory : Repository {
@@ -19,7 +18,7 @@ object NetworkRepsitory : Repository {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun getConvertedAddr(lat: Double, lng: Double): Observable<ResponseAddress> {
+    override fun getConvertedAddr(lat: Double, lng: Double): Observable<Address> {
         //129.075090,35.179632
         return ApiManager.getAddressFromLatLng(lat, lng)
     }
