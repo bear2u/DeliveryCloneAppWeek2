@@ -16,8 +16,9 @@ object ApiManager {
         retrofit = BaseApiManager.initRetrofit(BASE_SERVER)
     }
 
-    fun getAddressFromLatLng(lat : Double, lng : Double) : Observable<Address> {
+    fun getAddressFromLatLng(lng: Double, lat: Double) : Observable<Address> {
         val addressService = retrofit.create(AddressService::class.java)
+        Log.d("gdg","getAddressFromLatLng : $lat, $lng,")
         return addressService.getAddress(query = "$lat,$lng")
                 .map{ it.result } //ResponseAddress -> Address
                 .subscribeOn(Schedulers.io())

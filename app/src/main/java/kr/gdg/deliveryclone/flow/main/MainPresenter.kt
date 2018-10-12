@@ -1,24 +1,42 @@
 package kr.gdg.deliveryclone.flow.main
 
+import android.util.Log
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
+import io.reactivex.rxkotlin.subscribeBy
 import kr.gdg.deliveryclone.mvp.BaseMvpPresenterImpl
-import kr.gdg.deliveryclone.repository.Repository
 import kr.gdg.deliveryclone.repository.RepositoryImpl
 
 class MainPresenter : BaseMvpPresenterImpl<MainContract.View>(), MainContract.Presenter {
+
+    private var compositeDisposable : CompositeDisposable  = CompositeDisposable()
 
     private val repository  by lazy {
         RepositoryImpl()
     }
 
-    override fun addCount(count: Int) {
-//        repository.addCount(count)
-//
-//        val result = repository.getCount()
+    override fun getAddr(lng: Double, lat: Double) {
+        //129
+        Log.d("gdg", "#15 $lng, $lat");
+        val disposable = repository.convertAddr(lng, lat)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(
+                        onNext = {
+                            Log.d("gdg", "#22 : $it")
+                            mView?.updateAddress(it.items[0].addressDetail.dongmyun)
+                        },
+                        onError = {
+                            it.printStackTrace()
+                        }
+                )
 
-        mView?.updateView(count + 1)
+        compositeDisposable.add(disposable)
     }
 
-    override fun getAddr(lat: Double, lng: Double) {
-        repository.convertAddr(129.075090, 35.179632)
+    override fun detachView() {
+        super.detachView()
+        compositeDisposable.clear()
     }
+
 }

@@ -5,7 +5,7 @@ import android.support.annotation.StringRes
 
 interface BaseMvpView {
 
-    fun getContext(): Context
+    fun getContext(): Context?
 
     fun showError(error: String?)
 

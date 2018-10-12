@@ -7,4 +7,5 @@
     <dimen name="fab_margin">16dp</dimen>
 
     <dimen name="item_offset">10dp</dimen>
+    <dimen name="list_item_offset">5dp</dimen>
 </resources>

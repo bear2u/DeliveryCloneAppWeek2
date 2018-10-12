@@ -1,56 +1,51 @@
 package kr.gdg.deliveryclone.flow.main
 
-import android.annotation.SuppressLint
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.location.Criteria
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.os.Bundle
+import android.provider.Settings
 import android.support.design.widget.NavigationView
+import android.support.v4.app.ActivityCompat
+import android.support.v4.content.ContextCompat
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.widget.GridLayoutManager
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import kr.gdg.deliveryclone.R
-import kr.gdg.deliveryclone.model.MainItemModel
+import kr.gdg.deliveryclone.flow.list.ListActivity
+import kr.gdg.deliveryclone.model.Category
 import kr.gdg.deliveryclone.mvp.BaseMvpActivity
-import android.support.v7.widget.RecyclerView
-import android.support.annotation.DimenRes
-import android.content.Context
-import android.graphics.Rect
-import android.support.annotation.NonNull
-import android.view.View
-import android.widget.TextView
-import android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.location.Location
-import android.location.LocationListener
-import android.location.LocationManager
-import android.provider.Settings
-import android.location.Criteria
-import android.support.v4.app.ActivityCompat
-import android.support.v4.content.ContextCompat
-import android.util.Log
-import kr.gdg.deliveryclone.utils.CheckPermission
+import kr.gdg.deliveryclone.utils.ItemOffsetDecoration
 
 
 class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(), MainContract.View, NavigationView.OnNavigationItemSelectedListener, LocationListener {
     private lateinit var locationManager : LocationManager
     private lateinit var provider: String
 
+    lateinit var mTitle : TextView
 
     override var mPresenter: MainContract.Presenter = MainPresenter()
 
     val items = arrayOf(
-            MainItemModel(0, R.drawable.bdt_home_a_ctgr_all),
-            MainItemModel(1, R.drawable.bdt_home_a_ctgr_seasonal, R.drawable.bdt_btn_brown),
-            MainItemModel(2, R.drawable.bdt_home_a_ctgr_chicken),
-            MainItemModel(3, R.drawable.bdt_home_a_ctgr_chinese),
-            MainItemModel(4, R.drawable.bdt_home_a_ctgr_pizza),
-            MainItemModel(5, R.drawable.bdt_home_a_ctgr_bossam),
-            MainItemModel(6, R.drawable.bdt_home_a_ctgr_burger),
-            MainItemModel(7, R.drawable.bdt_home_a_ctgr_japanese)
+            Category(0, R.drawable.bdt_home_a_ctgr_all, title = "전체"),
+            Category(1, R.drawable.bdt_home_a_ctgr_seasonal, R.drawable.bdt_btn_brown, title = "계절메뉴"),
+            Category(2, R.drawable.bdt_home_a_ctgr_chicken, title = "치킨"),
+            Category(3, R.drawable.bdt_home_a_ctgr_chinese, title = "중식"),
+            Category(4, R.drawable.bdt_home_a_ctgr_pizza, title = "피자"),
+            Category(5, R.drawable.bdt_home_a_ctgr_bossam, title = "족발,보쌈"),
+            Category(6, R.drawable.bdt_home_a_ctgr_burger, title = "도시락"),
+            Category(7, R.drawable.bdt_home_a_ctgr_japanese, title = "일식")
     )
 
 
@@ -65,7 +60,7 @@ class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(
         val toggle = ActionBarDrawerToggle(
                 this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
         drawer_layout.addDrawerListener(toggle)
-        val mTitle = toolbar.findViewById<TextView>(R.id.toolbar_title)
+        mTitle = toolbar.findViewById<TextView>(R.id.toolbar_title)
         mTitle.text = getString(R.string.app_name)
         toggle.syncState()
         toolbar.setNavigationIcon(R.drawable.bdt_navi_side)
@@ -77,7 +72,7 @@ class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(
 
     private fun initRecyclerView() {
         mainRecyclerView.layoutManager = GridLayoutManager(getContext(), 2)
-        mainRecyclerView.adapter = MainRecylerViewAdapter(items, getContext())
+        mainRecyclerView.adapter = MainRecylerViewAdapter(items, getContext(), ::handleItem)
         val itemDecoration = ItemOffsetDecoration(getContext(), R.dimen.item_offset)
         mainRecyclerView.addItemDecoration(itemDecoration)
     }
@@ -133,8 +128,8 @@ class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(
         return true
     }
 
-    override fun updateView(count: Int) {
-//        resultTxt.text = count.toString()
+    override fun updateAddress(dong : String?) {
+        mTitle.text = dong ?: getString(R.string.app_name);
     }
 
     private fun initMyLocation() {
@@ -176,16 +171,7 @@ class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    internal inner class ItemOffsetDecoration(private val mItemOffset: Int) : RecyclerView.ItemDecoration() {
 
-        constructor(@NonNull context: Context, @DimenRes itemOffsetId: Int) : this(context.getResources().getDimensionPixelSize(itemOffsetId)) {}
-
-        override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView,
-                           state: RecyclerView.State) {
-            super.getItemOffsets(outRect, view, parent, state)
-            outRect.set(mItemOffset, mItemOffset, mItemOffset, mItemOffset)
-        }
-    }
 
     fun checkGPS() {
         val service = getSystemService(Context.LOCATION_SERVICE) as LocationManager
@@ -199,6 +185,14 @@ class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(
             val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
             startActivity(intent)
         }
+    }
+
+    fun handleItem(item: Category) {
+        startActivity(
+            Intent(this, ListActivity::class.java).apply {
+                this.putExtra("item", item)
+            }
+        )
     }
 
     fun updateMyLocation() {
@@ -224,9 +218,8 @@ class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(
         val location = locationManager.getLastKnownLocation(provider);
         if(location != null) {
             Log.d("KTH","${location.latitude},${location.longitude}")
-            mPresenter.getAddr(0.0,0.0)
+            mPresenter.getAddr(lng = location.longitude, lat = location.latitude)
         }
     }
-
 
 }

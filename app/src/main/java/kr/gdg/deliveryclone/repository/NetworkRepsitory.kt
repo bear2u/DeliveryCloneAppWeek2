@@ -18,8 +18,8 @@ object NetworkRepsitory : Repository {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun getConvertedAddr(lat: Double, lng: Double): Observable<Address> {
+    override fun getConvertedAddr(lng: Double, lat: Double): Observable<Address> {
         //129.075090,35.179632
-        return ApiManager.getAddressFromLatLng(lat, lng)
+        return ApiManager.getAddressFromLatLng(lng, lat)
     }
 }
